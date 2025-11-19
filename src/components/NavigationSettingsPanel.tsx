@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import type { NavigationItem } from '@/types/navigation';
+import { NavigationItemForm } from './NavigationItemForm';
+import { navigationService } from '@/services/NavigationService';
 import {
   Settings,
   Save,
@@ -9,7 +12,9 @@ import {
   Zap,
   Shield,
   Globe,
-  Palette
+  Palette,
+  Plus,
+  List
 } from 'lucide-react';
 
 type NavigationSettings = {
@@ -39,16 +44,32 @@ type NavigationSettings = {
   updated_by: string | null;
 };
 
-export default function NavigationSettingsPanel() {
+interface NavigationSettingsPanelProps {
+  onItemsChange?: () => void;
+}
+
+export default function NavigationSettingsPanel({ onItemsChange }: NavigationSettingsPanelProps) {
   const [settings, setSettings] = useState<NavigationSettings | null>(null);
   const [originalSettings, setOriginalSettings] = useState<NavigationSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showItemForm, setShowItemForm] = useState(false);
+  const [items, setItems] = useState<NavigationItem[]>([]);
 
   useEffect(() => {
     loadSettings();
+    loadItems();
   }, []);
+
+  async function loadItems() {
+    try {
+      const data = await navigationService.getAllItems(true);
+      setItems(data);
+    } catch (err) {
+      console.error('Failed to load items:', err);
+    }
+  }
 
   async function loadSettings() {
     try {
@@ -153,11 +174,18 @@ export default function NavigationSettingsPanel() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Backend Configuration</h2>
-            <p className="text-sm text-gray-600">Server settings and feature flags</p>
+            <p className="text-sm text-gray-600">Server settings and navigation management</p>
           </div>
         </div>
 
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowItemForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Item
+          </button>
           {hasChanges && (
             <button
               onClick={resetSettings}
@@ -449,12 +477,40 @@ export default function NavigationSettingsPanel() {
         </div>
       </div>
 
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <List className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Navigation Items Management</h3>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          Total items: <span className="font-semibold">{items.length}</span> |
+          Active: <span className="font-semibold text-green-600">{items.filter(i => i.is_active).length}</span> |
+          Inactive: <span className="font-semibold text-gray-500">{items.filter(i => !i.is_active).length}</span>
+        </p>
+        <p className="text-xs text-gray-500">
+          Use the "Add Item" button above to create new navigation entries.
+          View and edit items in the "Navigation Tree" tab.
+        </p>
+      </div>
+
       <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <p>Last updated: {new Date(settings.updated_at).toLocaleString()}</p>
           <p>Updated by: {settings.updated_by || 'System'}</p>
         </div>
       </div>
+
+      {showItemForm && (
+        <NavigationItemForm
+          parentItems={items.filter(i => !i.parent_id)}
+          onSave={() => {
+            setShowItemForm(false);
+            loadItems();
+            onItemsChange?.();
+          }}
+          onCancel={() => setShowItemForm(false)}
+        />
+      )}
     </div>
   );
 }

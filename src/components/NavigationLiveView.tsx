@@ -215,28 +215,16 @@ export default function NavigationLiveView() {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setEditingItem(undefined);
-                  setShowForm(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Item
-              </button>
-              <button
-                onClick={() => {
-                  loadNavigationItems();
-                  loadNavigationLogs();
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                loadNavigationItems();
+                loadNavigationLogs();
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -470,7 +458,7 @@ export default function NavigationLiveView() {
           )}
 
           {!loading && activeTab === 'settings' && (
-            <NavigationSettingsPanel />
+            <NavigationSettingsPanel onItemsChange={loadNavigationItems} />
           )}
 
           {!loading && activeTab === 'logs' && (
