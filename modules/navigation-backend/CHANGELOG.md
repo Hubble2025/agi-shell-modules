@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.3] - 2025-11-19
+
+### Added
+- **Backend Configuration System** - Enterprise-grade settings management
+  - `navigation_settings` table - Server-side configuration storage
+  - `navigation_settings_history` table - Complete change audit trail
+  - **Performance Settings**: Cache TTL, max tree depth, advanced indexes toggle
+  - **Security Settings**: Authentication requirements, audit logging, rate limits
+  - **Feature Flags**: Live updates, soft delete, versioning control
+  - **API Settings**: Rate limiting, batch size control, public API toggle
+  - **UI Settings**: Default icon, theme configuration, language settings
+- **Settings Management UI** - Comprehensive admin panel for backend configuration
+  - Real-time settings editor with live validation
+  - Category-based organization (Performance, Security, API, Features)
+  - Change detection with save/reset controls
+  - Settings history tracking with actor attribution
+- **Singleton Pattern** - Enforces single settings row via constraint
+- **Automatic Change Tracking** - Trigger-based history logging
+- **Field-Level Change Detection** - Tracks exactly which settings changed
+
+### Changed
+- Module version incremented from 1.3.2 to 1.3.3
+- Live View UI now includes dedicated Settings tab
+- Enhanced RLS policies for settings management (admin-only)
+- Updated documentation with backend configuration guide
+
+### Security
+- Admin-only read/write access to settings
+- Immutable system keys protection
+- Validation constraints on critical values
+- Complete audit trail for all configuration changes
+
+### Configuration Schema
+- `cache_ttl` (integer, default: 300) - Cache duration in seconds
+- `max_tree_depth` (integer, default: 10) - Maximum hierarchy depth
+- `enable_advanced_indexes` (boolean, default: false) - Toggle DB tier
+- `require_authentication` (boolean, default: true) - Force authentication
+- `enable_audit_logging` (boolean, default: true) - Enable audit trail
+- `max_failed_queries` (integer, default: 100) - Rate limit threshold
+- `enable_live_updates` (boolean, default: true) - Real-time subscriptions
+- `enable_soft_delete` (boolean, default: false) - Soft delete mode
+- `enable_versioning` (boolean, default: false) - Version control
+- `api_rate_limit` (integer, default: 60) - Requests per minute
+- `max_batch_size` (integer, default: 100) - Maximum bulk operations
+- `enable_public_api` (boolean, default: false) - Unauthenticated access
+- `default_icon` (text, default: '📄') - Fallback icon
+- `theme` (jsonb) - UI theme configuration
+- `language` (text, default: 'en') - Default language
+- `custom_config` (jsonb) - Extended configuration storage
+
+### Migration
+- Non-breaking change - fully compatible with v1.3.0-1.3.2
+- Default settings automatically inserted
+- Idempotent migration (safe to run multiple times)
+- History table for full change tracking
+
+---
+
 ## [1.3.2] - 2025-01-19
 
 ### Added

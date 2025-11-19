@@ -1,6 +1,6 @@
-# Navigation Backend Module v1.3.2
+# Navigation Backend Module v1.3.3
 
-Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging.
+Enterprise-grade navigation management system with hierarchical structure, role-based access control, comprehensive audit logging, and backend configuration management.
 
 ## Overview
 
@@ -141,6 +141,72 @@ INSERT INTO navigation_items (title, path) VALUES ('Test', '/test');
 | actor | TEXT | User/system identifier |
 | changes | JSONB | Change payload |
 | created_at | TIMESTAMPTZ | Log timestamp |
+
+## Backend Configuration (v1.3.3)
+
+The Navigation Backend includes a comprehensive settings system for server-side configuration and runtime behavior control.
+
+### Settings Categories
+
+#### Performance Settings
+- `cache_ttl` (300s default) - Cache duration for navigation items
+- `max_tree_depth` (10 default) - Maximum hierarchy depth (1-50)
+- `enable_advanced_indexes` (false default) - Toggle Advanced DB Tier
+
+#### Security Settings
+- `require_authentication` (true default) - Force authentication for all navigation
+- `enable_audit_logging` (true default) - Track all changes in navigation_logs
+- `max_failed_queries` (100 default) - Rate limit threshold for failed queries
+
+#### Feature Flags
+- `enable_live_updates` (true default) - Real-time subscriptions via Supabase
+- `enable_soft_delete` (false default) - Mark as deleted instead of hard delete
+- `enable_versioning` (false default) - Track navigation versions
+
+#### API Settings
+- `api_rate_limit` (60 req/min default) - API request rate limit
+- `max_batch_size` (100 default) - Maximum bulk operations size (1-1000)
+- `enable_public_api` (false default) - Allow unauthenticated API access
+
+#### UI Settings
+- `default_icon` ('📄' default) - Fallback icon for navigation items
+- `theme` (JSONB) - UI theme configuration (mode, colors)
+- `language` ('en' default) - Default language for UI
+
+### Managing Settings
+
+Settings are stored in the `navigation_settings` table with a singleton pattern (only one row allowed).
+
+```sql
+-- View current settings
+SELECT * FROM navigation_settings;
+
+-- Update settings (admin only)
+UPDATE navigation_settings
+SET cache_ttl = 600,
+    enable_live_updates = true,
+    api_rate_limit = 120
+WHERE id = '00000000-0000-0000-0000-000000000001';
+
+-- View settings history
+SELECT * FROM navigation_settings_history
+ORDER BY created_at DESC
+LIMIT 10;
+```
+
+### Settings UI
+
+Access the settings management panel via the Live View interface:
+1. Navigate to Navigation Backend Live View
+2. Click the "Settings" tab
+3. Modify settings in organized categories
+4. Click "Save Changes" to apply
+
+All changes are:
+- Validated for constraints
+- Tracked in settings_history
+- Attributed to the acting user
+- Applied immediately without restart
 
 ## Performance Indexes
 

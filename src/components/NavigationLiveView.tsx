@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, type NavigationItem, type NavigationLog } from '../lib/supabase';
+import NavigationSettingsPanel from './NavigationSettingsPanel';
 import {
   FolderTree,
   Plus,
@@ -11,7 +12,8 @@ import {
   ChevronDown,
   Activity,
   Database,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from 'lucide-react';
 
 export default function NavigationLiveView() {
@@ -21,7 +23,7 @@ export default function NavigationLiveView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'tree' | 'logs'>('tree');
+  const [activeTab, setActiveTab] = useState<'tree' | 'logs' | 'settings'>('tree');
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -272,6 +274,19 @@ export default function NavigationLiveView() {
             >
               Audit Logs
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`
+                px-4 py-2 font-medium transition-colors flex items-center gap-2
+                ${activeTab === 'settings'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+                }
+              `}
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </button>
           </div>
 
           {error && (
@@ -401,6 +416,10 @@ export default function NavigationLiveView() {
                 )}
               </div>
             </div>
+          )}
+
+          {!loading && activeTab === 'settings' && (
+            <NavigationSettingsPanel />
           )}
 
           {!loading && activeTab === 'logs' && (
