@@ -77,6 +77,44 @@ export NAV_BACKEND_ENABLE_ADVANCED_INDEXES=true
 
 ## Database Schema
 
+### Important: User Roles Configuration
+
+This module uses Row Level Security (RLS) with role-based access control. User roles **must** be stored in Supabase's `auth.users.raw_app_meta_data` column.
+
+**Example role configuration:**
+
+```sql
+-- Set admin role for a user
+UPDATE auth.users
+SET raw_app_meta_data = jsonb_set(
+  COALESCE(raw_app_meta_data, '{}'::jsonb),
+  '{roles}',
+  '["admin"]'::jsonb
+)
+WHERE id = 'user-uuid-here';
+
+-- Set multiple roles
+UPDATE auth.users
+SET raw_app_meta_data = jsonb_set(
+  COALESCE(raw_app_meta_data, '{}'::jsonb),
+  '{roles}',
+  '["admin", "editor"]'::jsonb
+)
+WHERE id = 'user-uuid-here';
+```
+
+**Testing RLS policies:**
+
+```sql
+-- Test as specific user (run in psql with superuser)
+SET LOCAL role TO authenticated;
+SET LOCAL request.jwt.claims TO '{"sub": "user-uuid", "app_metadata": {"roles": ["admin"]}}';
+
+-- Now test queries
+SELECT * FROM navigation_items;
+INSERT INTO navigation_items (title, path) VALUES ('Test', '/test');
+```
+
 ### navigation_items
 
 | Column | Type | Description |

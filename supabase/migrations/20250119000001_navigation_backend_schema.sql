@@ -68,6 +68,8 @@ ALTER TABLE navigation_logs ENABLE ROW LEVEL SECURITY;
 -- RLS Policies for navigation_items
 
 -- SELECT: Authenticated users can view items matching their roles
+-- NOTE: This policy checks roles from auth.jwt()->'app_metadata'->'roles'
+-- Ensure user roles are stored in raw_app_meta_data in Supabase auth.users table
 CREATE POLICY "Users can view navigation items matching their roles"
   ON navigation_items
   FOR SELECT
@@ -80,7 +82,10 @@ CREATE POLICY "Users can view navigation items matching their roles"
         SELECT 1 FROM unnest(roles) AS role
         WHERE role IN (
           SELECT jsonb_array_elements_text(
-            COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+            COALESCE(
+              (auth.jwt()->'app_metadata'->'roles')::jsonb,
+              '[]'::jsonb
+            )
           )
         )
       )
@@ -95,7 +100,10 @@ CREATE POLICY "Admins can create navigation items"
   WITH CHECK (
     'admin' = ANY(
       SELECT jsonb_array_elements_text(
-        COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+        COALESCE(
+          (auth.jwt()->'app_metadata'->'roles')::jsonb,
+          '[]'::jsonb
+        )
       )
     )
   );
@@ -108,14 +116,20 @@ CREATE POLICY "Admins can update navigation items"
   USING (
     'admin' = ANY(
       SELECT jsonb_array_elements_text(
-        COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+        COALESCE(
+          (auth.jwt()->'app_metadata'->'roles')::jsonb,
+          '[]'::jsonb
+        )
       )
     )
   )
   WITH CHECK (
     'admin' = ANY(
       SELECT jsonb_array_elements_text(
-        COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+        COALESCE(
+          (auth.jwt()->'app_metadata'->'roles')::jsonb,
+          '[]'::jsonb
+        )
       )
     )
   );
@@ -128,7 +142,10 @@ CREATE POLICY "Admins can delete navigation items"
   USING (
     'admin' = ANY(
       SELECT jsonb_array_elements_text(
-        COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+        COALESCE(
+          (auth.jwt()->'app_metadata'->'roles')::jsonb,
+          '[]'::jsonb
+        )
       )
     )
   );
@@ -143,7 +160,10 @@ CREATE POLICY "Admins can view navigation logs"
   USING (
     'admin' = ANY(
       SELECT jsonb_array_elements_text(
-        COALESCE(auth.jwt()->>'user_metadata', '{}')::jsonb->'roles'
+        COALESCE(
+          (auth.jwt()->'app_metadata'->'roles')::jsonb,
+          '[]'::jsonb
+        )
       )
     )
   );
