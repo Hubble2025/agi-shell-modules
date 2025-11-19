@@ -1,9 +1,9 @@
 {
   "$schema": "https://agi-shell-cms.com/schemas/module-manifest-v1.json",
   "module_id": "navigation-backend",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "name": "Navigation Backend Module",
-  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging. v1.3.2 includes optional Advanced DB Tier for enterprise-scale deployments (1000+ items).",
+  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging. v1.4.0 is a complete standalone module with all components, services, and migrations included.",
   "author": "Sebastian Hühn",
   "license": "OPSL-1.0",
   "compat": {
@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "supabase": ">=2.0.0",
-    "postgres": ">=14.0.0"
+    "postgres": ">=14.0.0",
+    "react": ">=18.0.0",
+    "lucide-react": ">=0.300.0"
   },
   "provides": {
     "api": [
@@ -22,12 +24,38 @@
       "/api/navigation/tree",
       "/api/navigation/logs"
     ],
+    "components": [
+      "NavigationLiveView",
+      "NavigationSettingsPanel",
+      "NavigationItemForm",
+      "NavigationIcon"
+    ],
+    "services": [
+      "NavigationService"
+    ],
+    "types": [
+      "NavigationItem",
+      "NavigationLog"
+    ],
     "database": {
-      "tables": ["navigation_items", "navigation_logs"],
+      "tables": [
+        "navigation_items",
+        "navigation_logs",
+        "navigation_settings",
+        "navigation_groups",
+        "navigation_ui_settings",
+        "navigation_assets",
+        "navigation_icons"
+      ],
       "migrations": [
         "20250119000001_navigation_backend_schema.sql",
         "20250119000002_navigation_backend_indexes.sql",
-        "20250119000003_navigation_backend_advanced_indexes.sql"
+        "20250119000003_navigation_backend_advanced_indexes.sql",
+        "20250119000004_navigation_backend_settings.sql",
+        "20251119050637_20250119000005_tenant_id_and_feature_flags.sql",
+        "20251119050718_20250119000006_ui_settings_and_assets.sql",
+        "20251119050739_20250119000007_icon_system.sql",
+        "20251119050905_20250119000008_default_groups_and_structure.sql"
       ]
     },
     "events": [
@@ -35,6 +63,13 @@
       "navigation:item:updated",
       "navigation:item:deleted"
     ]
+  },
+  "module_structure": {
+    "supabase/migrations": "Database migration files",
+    "src/components": "React components for navigation UI",
+    "src/services": "Business logic and API services",
+    "src/types": "TypeScript type definitions",
+    "src/lib": "Supabase client configuration"
   },
   "features": {
     "hierarchical_navigation": {

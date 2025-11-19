@@ -1,7 +1,14 @@
 {
   "$schema": "https://agi-shell-cms.com/schemas/install-module-v1.json",
   "module_id": "navigation-backend",
-  "version": "1.3.2",
+  "version": "1.4.0",
+  "install_paths": {
+    "migrations": "supabase/migrations",
+    "components": "src/components",
+    "services": "src/services",
+    "types": "src/types",
+    "lib": "src/lib"
+  },
   "actions": [
     {
       "type": "db_migration",
@@ -21,12 +28,75 @@
       "required": false,
       "optional": true,
       "flag": "enable_advanced_nav_indexes",
-      "description": "Advanced DB Tier: Composite, partial, and path indexes for enterprise-scale (v1.3.2)",
+      "description": "Advanced DB Tier: Composite, partial, and path indexes for enterprise-scale",
       "recommendation": {
         "trigger": "item_count > 500",
         "impact": "40-60% faster queries on large trees",
         "storage_overhead": "~2-3%"
       }
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20250119000004_navigation_backend_settings.sql",
+      "required": true,
+      "description": "Create navigation_settings table with configuration options"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251119050637_20250119000005_tenant_id_and_feature_flags.sql",
+      "required": true,
+      "description": "Add tenant_id and feature flags for multi-tenancy support"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251119050718_20250119000006_ui_settings_and_assets.sql",
+      "required": true,
+      "description": "Create navigation_ui_settings and navigation_assets tables"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251119050739_20250119000007_icon_system.sql",
+      "required": true,
+      "description": "Create navigation_icons table for custom icon management"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251119050905_20250119000008_default_groups_and_structure.sql",
+      "required": true,
+      "description": "Create navigation_groups table and default navigation structure"
+    },
+    {
+      "type": "copy_files",
+      "source": "./src/components",
+      "destination": "src/components",
+      "files": [
+        "NavigationLiveView.tsx",
+        "NavigationSettingsPanel.tsx",
+        "NavigationItemForm.tsx",
+        "NavigationIcon.tsx"
+      ],
+      "description": "Install React components for navigation UI"
+    },
+    {
+      "type": "copy_files",
+      "source": "./src/services",
+      "destination": "src/services",
+      "files": ["NavigationService.ts"],
+      "description": "Install navigation service"
+    },
+    {
+      "type": "copy_files",
+      "source": "./src/types",
+      "destination": "src/types",
+      "files": ["navigation.ts"],
+      "description": "Install TypeScript type definitions"
+    },
+    {
+      "type": "copy_files",
+      "source": "./src/lib",
+      "destination": "src/lib",
+      "files": ["supabase.ts"],
+      "description": "Install Supabase client configuration"
     }
   ],
   "post_install": [
@@ -35,20 +105,31 @@
       "event": "module:installed",
       "payload": {
         "module_id": "navigation-backend",
-        "version": "1.3.2",
-        "features": ["hierarchical_navigation", "role_based_access", "audit_logging", "performance_optimized", "advanced_db_tier"]
+        "version": "1.4.0",
+        "features": ["hierarchical_navigation", "role_based_access", "audit_logging", "performance_optimized", "advanced_db_tier", "settings_management", "ui_customization", "icon_system", "navigation_groups"]
       }
     },
     {
       "type": "log",
       "level": "info",
-      "message": "Navigation Backend Module v1.3.2 installed successfully. Database schema and performance indexes applied."
+      "message": "Navigation Backend Module v1.4.0 installed successfully. All components, services, and database migrations applied."
     }
   ],
   "rollback": [
     {
+      "type": "remove_files",
+      "files": [
+        "src/components/NavigationLiveView.tsx",
+        "src/components/NavigationSettingsPanel.tsx",
+        "src/components/NavigationItemForm.tsx",
+        "src/components/NavigationIcon.tsx",
+        "src/services/NavigationService.ts",
+        "src/types/navigation.ts"
+      ]
+    },
+    {
       "type": "db_migration",
-      "sql": "DROP TRIGGER IF EXISTS navigation_items_audit ON navigation_items; DROP TRIGGER IF EXISTS navigation_items_updated_at ON navigation_items; DROP FUNCTION IF EXISTS log_navigation_changes(); DROP FUNCTION IF EXISTS update_navigation_items_updated_at(); DROP TABLE IF EXISTS navigation_logs CASCADE; DROP TABLE IF EXISTS navigation_items CASCADE;"
+      "sql": "DROP TRIGGER IF EXISTS navigation_items_audit ON navigation_items; DROP TRIGGER IF EXISTS navigation_items_updated_at ON navigation_items; DROP FUNCTION IF EXISTS log_navigation_changes(); DROP FUNCTION IF EXISTS update_navigation_items_updated_at(); DROP TABLE IF EXISTS navigation_icons CASCADE; DROP TABLE IF EXISTS navigation_assets CASCADE; DROP TABLE IF EXISTS navigation_ui_settings CASCADE; DROP TABLE IF EXISTS navigation_groups CASCADE; DROP TABLE IF EXISTS navigation_settings CASCADE; DROP TABLE IF EXISTS navigation_logs CASCADE; DROP TABLE IF EXISTS navigation_items CASCADE;"
     }
   ],
   "validation": {
@@ -60,6 +141,38 @@
       {
         "type": "db_table_exists",
         "table": "navigation_logs"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_settings"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_groups"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_ui_settings"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_assets"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_icons"
+      },
+      {
+        "type": "file_exists",
+        "path": "src/components/NavigationLiveView.tsx"
+      },
+      {
+        "type": "file_exists",
+        "path": "src/services/NavigationService.ts"
+      },
+      {
+        "type": "file_exists",
+        "path": "src/types/navigation.ts"
       },
       {
         "type": "db_index_exists",
