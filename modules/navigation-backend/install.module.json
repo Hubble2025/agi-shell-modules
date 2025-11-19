@@ -1,0 +1,73 @@
+{
+  "$schema": "https://agi-shell-cms.com/schemas/install-module-v1.json",
+  "module_id": "navigation-backend",
+  "version": "1.3.1",
+  "actions": [
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20250119000001_navigation_backend_schema.sql",
+      "required": true,
+      "description": "Create navigation_items and navigation_logs tables with RLS policies"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20250119000002_navigation_backend_indexes.sql",
+      "required": true,
+      "description": "Add performance-optimized indexes for large navigation trees (v1.3.1)"
+    }
+  ],
+  "post_install": [
+    {
+      "type": "emit_event",
+      "event": "module:installed",
+      "payload": {
+        "module_id": "navigation-backend",
+        "version": "1.3.1",
+        "features": ["hierarchical_navigation", "role_based_access", "audit_logging", "performance_optimized"]
+      }
+    },
+    {
+      "type": "log",
+      "level": "info",
+      "message": "Navigation Backend Module v1.3.1 installed successfully. Database schema and performance indexes applied."
+    }
+  ],
+  "rollback": [
+    {
+      "type": "db_migration",
+      "sql": "DROP TRIGGER IF EXISTS navigation_items_audit ON navigation_items; DROP TRIGGER IF EXISTS navigation_items_updated_at ON navigation_items; DROP FUNCTION IF EXISTS log_navigation_changes(); DROP FUNCTION IF EXISTS update_navigation_items_updated_at(); DROP TABLE IF EXISTS navigation_logs CASCADE; DROP TABLE IF EXISTS navigation_items CASCADE;"
+    }
+  ],
+  "validation": {
+    "checks": [
+      {
+        "type": "db_table_exists",
+        "table": "navigation_items"
+      },
+      {
+        "type": "db_table_exists",
+        "table": "navigation_logs"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_items_parent_id"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_items_sort_order"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_items_roles"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_logs_actor"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_logs_created_at"
+      }
+    ]
+  }
+}

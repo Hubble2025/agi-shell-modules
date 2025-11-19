@@ -1,0 +1,75 @@
+{
+  "$schema": "https://agi-shell-cms.com/schemas/module-manifest-v1.json",
+  "module_id": "navigation-backend",
+  "version": "1.3.1",
+  "name": "Navigation Backend Module",
+  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging. v1.3.1 includes performance optimizations for large navigation trees (1000+ items).",
+  "author": "Sebastian Hühn",
+  "license": "OPSL-1.0",
+  "compat": {
+    "agi_shell_cms": ">=1.9.0",
+    "boltnew": "*",
+    "semantic_os": "*",
+    "aion": "*"
+  },
+  "dependencies": {
+    "supabase": ">=2.0.0",
+    "postgres": ">=14.0.0"
+  },
+  "provides": {
+    "api": [
+      "/api/navigation/items",
+      "/api/navigation/tree",
+      "/api/navigation/logs"
+    ],
+    "database": {
+      "tables": ["navigation_items", "navigation_logs"],
+      "migrations": [
+        "20250119000001_navigation_backend_schema.sql",
+        "20250119000002_navigation_backend_indexes.sql"
+      ]
+    },
+    "events": [
+      "navigation:item:created",
+      "navigation:item:updated",
+      "navigation:item:deleted"
+    ]
+  },
+  "features": {
+    "hierarchical_navigation": {
+      "description": "Unlimited depth tree structure with parent-child relationships",
+      "enabled": true
+    },
+    "role_based_access": {
+      "description": "Fine-grained role-based visibility control",
+      "enabled": true
+    },
+    "audit_logging": {
+      "description": "Comprehensive change tracking with actor attribution",
+      "enabled": true
+    },
+    "performance_optimized": {
+      "description": "Optimized indexes for large-scale deployments (v1.3.1)",
+      "enabled": true,
+      "version": "1.3.1"
+    }
+  },
+  "configuration": {
+    "max_depth": {
+      "type": "integer",
+      "default": 10,
+      "description": "Maximum allowed navigation tree depth"
+    },
+    "default_roles": {
+      "type": "array",
+      "default": ["authenticated"],
+      "description": "Default roles for new navigation items"
+    },
+    "enable_audit": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable comprehensive audit logging"
+    }
+  },
+  "tags": ["navigation", "menu", "cms", "backend", "enterprise", "rbac", "audit"]
+}
