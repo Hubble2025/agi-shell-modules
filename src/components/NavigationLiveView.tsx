@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { supabase, type NavigationItem, type NavigationLog } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+import type { NavigationItem } from '@/types/navigation';
 import NavigationSettingsPanel from './NavigationSettingsPanel';
+import { NavigationIcon } from './NavigationIcon';
+import { NavigationItemForm } from './NavigationItemForm';
+import { navigationService } from '@/services/NavigationService';
 import {
   FolderTree,
   Plus,
@@ -16,6 +20,15 @@ import {
   Settings
 } from 'lucide-react';
 
+interface NavigationLog {
+  id: string;
+  navigation_id: string | null;
+  action: 'create' | 'update' | 'delete';
+  actor: string;
+  changes: Record<string, unknown>;
+  created_at: string;
+}
+
 export default function NavigationLiveView() {
   const [items, setItems] = useState<NavigationItem[]>([]);
   const [logs, setLogs] = useState<NavigationLog[]>([]);
@@ -25,6 +38,8 @@ export default function NavigationLiveView() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tree' | 'logs' | 'settings'>('tree');
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<NavigationItem | undefined>(undefined);
 
   useEffect(() => {
     loadNavigationItems();
@@ -70,13 +85,8 @@ export default function NavigationLiveView() {
   async function loadNavigationItems() {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('navigation_items')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (fetchError) throw fetchError;
-      setItems(data || []);
+      const data = await navigationService.getAllItems(true);
+      setItems(data);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load navigation items');
@@ -156,7 +166,7 @@ export default function NavigationLiveView() {
           {!hasChildren && <div className="w-6" />}
 
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-lg">{item.icon || '📄'}</span>
+            <NavigationIcon icon={item.icon} className="w-5 h-5" />
             <span className="font-medium text-gray-900 truncate">{item.title}</span>
             <span className="text-xs text-gray-500 truncate">{item.path}</span>
           </div>
@@ -205,16 +215,28 @@ export default function NavigationLiveView() {
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                loadNavigationItems();
-                loadNavigationLogs();
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setEditingItem(undefined);
+                  setShowForm(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Item
+              </button>
+              <button
+                onClick={() => {
+                  loadNavigationItems();
+                  loadNavigationLogs();
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -408,6 +430,35 @@ export default function NavigationLiveView() {
                         </pre>
                       </div>
                     )}
+
+                    <div className="flex gap-2 pt-4">
+                      <button
+                        onClick={() => {
+                          setEditingItem(selectedItem);
+                          setShowForm(true);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (confirm(`Delete "${selectedItem.title}"?`)) {
+                            try {
+                              await navigationService.deleteItem(selectedItem.id);
+                              setSelectedId(null);
+                              loadNavigationItems();
+                            } catch (err) {
+                              alert('Failed to delete item');
+                            }
+                          }
+                        }}
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 text-center py-8">
@@ -491,6 +542,22 @@ export default function NavigationLiveView() {
           </div>
         </div>
       </div>
+
+      {showForm && (
+        <NavigationItemForm
+          item={editingItem}
+          parentItems={items.filter(i => !i.parent_id)}
+          onSave={() => {
+            setShowForm(false);
+            setEditingItem(undefined);
+            loadNavigationItems();
+          }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingItem(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }
