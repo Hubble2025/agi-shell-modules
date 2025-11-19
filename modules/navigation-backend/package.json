@@ -1,0 +1,58 @@
+{
+  "name": "@agi-shell/navigation-backend",
+  "version": "1.4.0",
+  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging",
+  "author": "Sebastian Hühn",
+  "license": "OPSL-1.0",
+  "type": "module",
+  "main": "src/services/NavigationService.ts",
+  "types": "src/types/navigation.ts",
+  "exports": {
+    ".": {
+      "import": "./src/services/NavigationService.ts",
+      "types": "./src/types/navigation.ts"
+    },
+    "./components": {
+      "import": "./src/components/index.ts"
+    },
+    "./types": {
+      "types": "./src/types/navigation.ts"
+    },
+    "./lib": {
+      "import": "./src/lib/supabase.ts"
+    }
+  },
+  "files": [
+    "src",
+    "supabase",
+    "manifest.json",
+    "install.module.json",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "navigation",
+    "menu",
+    "cms",
+    "backend",
+    "enterprise",
+    "rbac",
+    "audit",
+    "supabase",
+    "react",
+    "typescript"
+  ],
+  "peerDependencies": {
+    "@supabase/supabase-js": ">=2.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "lucide-react": ">=0.300.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agi-shell-cms/navigation-backend"
+  }
+}
