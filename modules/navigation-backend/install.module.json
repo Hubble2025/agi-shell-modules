@@ -1,7 +1,7 @@
 {
   "$schema": "https://agi-shell-cms.com/schemas/install-module-v1.json",
   "module_id": "navigation-backend",
-  "version": "1.4.0",
+  "version": "1.3.4",
   "install_paths": {
     "migrations": "supabase/migrations",
     "components": "src/components",
@@ -66,6 +66,24 @@
       "description": "Create navigation_groups table and default navigation structure"
     },
     {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251120000001_navigation_v134_view_layout_columns.sql",
+      "required": true,
+      "description": "Add view_type and layout_profile columns to navigation_items (v1.3.4)"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251120000002_navigation_v134_layout_profiles.sql",
+      "required": true,
+      "description": "Add layout_profiles JSONB column to navigation_settings (v1.3.4)"
+    },
+    {
+      "type": "db_migration",
+      "path": "./supabase/migrations/20251120000003_navigation_v134_routes_table.sql",
+      "required": true,
+      "description": "Create navigation_routes table for route registration (v1.3.4)"
+    },
+    {
       "type": "copy_files",
       "source": "./src/components",
       "destination": "src/components",
@@ -81,8 +99,8 @@
       "type": "copy_files",
       "source": "./src/services",
       "destination": "src/services",
-      "files": ["NavigationService.ts"],
-      "description": "Install navigation service"
+      "files": ["NavigationService.ts", "ValidationService.ts", "RouteRegistrationService.ts"],
+      "description": "Install navigation services (v1.3.4 includes ValidationService and RouteRegistrationService)"
     },
     {
       "type": "copy_files",
@@ -105,14 +123,14 @@
       "event": "module:installed",
       "payload": {
         "module_id": "navigation-backend",
-        "version": "1.4.0",
-        "features": ["hierarchical_navigation", "role_based_access", "audit_logging", "performance_optimized", "advanced_db_tier", "settings_management", "ui_customization", "icon_system", "navigation_groups"]
+        "version": "1.3.4",
+        "features": ["hierarchical_navigation", "role_based_access", "audit_logging", "performance_optimized", "advanced_db_tier", "settings_management", "ui_customization", "icon_system", "navigation_groups", "view_types", "layout_profiles", "route_registration"]
       }
     },
     {
       "type": "log",
       "level": "info",
-      "message": "Navigation Backend Module v1.4.0 installed successfully. All components, services, and database migrations applied."
+      "message": "Navigation Backend Module v1.3.4 installed successfully. All components, services, and database migrations applied."
     }
   ],
   "rollback": [
@@ -163,12 +181,24 @@
         "table": "navigation_icons"
       },
       {
+        "type": "db_table_exists",
+        "table": "navigation_routes"
+      },
+      {
         "type": "file_exists",
         "path": "src/components/NavigationLiveView.tsx"
       },
       {
         "type": "file_exists",
         "path": "src/services/NavigationService.ts"
+      },
+      {
+        "type": "file_exists",
+        "path": "src/services/ValidationService.ts"
+      },
+      {
+        "type": "file_exists",
+        "path": "src/services/RouteRegistrationService.ts"
       },
       {
         "type": "file_exists",
@@ -193,6 +223,18 @@
       {
         "type": "db_index_exists",
         "index": "idx_navigation_logs_created_at"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_items_layout_profile"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_routes_module_route"
+      },
+      {
+        "type": "db_index_exists",
+        "index": "idx_navigation_routes_module_id"
       }
     ],
     "optional_checks": [

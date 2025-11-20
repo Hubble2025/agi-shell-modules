@@ -245,7 +245,7 @@ export default function NavigationLiveView() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Navigation Backend Live View</h1>
-                <p className="text-sm text-gray-600">v1.3.2 - Real-time monitoring & management</p>
+                <p className="text-sm text-gray-600">v1.3.4 - View Types, Layout Profiles & Route Registration</p>
               </div>
             </div>
 
@@ -706,7 +706,7 @@ export default function NavigationLiveView() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <p>Navigation Backend Module v1.3.2 - OPSL-1.0 © 2025 Sebastian Hühn</p>
+            <p>Navigation Backend Module v1.3.4 - OPSL-1.0 © 2025 Sebastian Hühn</p>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span>Live updates active</span>
