@@ -1,11 +1,11 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import type {
   RegisterRoutesInput,
   RegisterRoutesResponse,
   RegisteredRouteResult,
   NavigationRoute,
   ViewType,
-} from '../types/navigation';
+} from '@/types/navigation';
 import { validationService, type ValidationError } from './ValidationService';
 import { navigationService } from './NavigationService';
 

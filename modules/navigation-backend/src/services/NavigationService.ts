@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 import type {
   NavigationItem,
   CreateNavigationItemInput,
@@ -9,7 +9,7 @@ import type {
   LayoutProfiles,
   NavigationFullResponse,
   NavigationRoute,
-} from '@/types/navigation';
+} from '../types/navigation';
 import { validationService, type ValidationError } from './ValidationService';
 
 export class NavigationService {
