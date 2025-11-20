@@ -1,17 +1,19 @@
-# Navigation Backend Module v1.4.0
+# Navigation Backend Module v1.3.4
 
-Enterprise-grade navigation management system with hierarchical structure, role-based access control, comprehensive audit logging, and backend configuration management.
+Enterprise-grade navigation management system with hierarchical structure, role-based access control, comprehensive audit logging, view types, layout profiles, and route registration.
 
 ## Overview
 
 The Navigation Backend Module provides a complete **standalone** solution for managing hierarchical navigation structures in AGI Shell CMS, Boltnew, Semantic OS, and AION environments.
 
-**v1.4.0** is a complete standalone module containing:
-- All database migrations (8 files)
+**v1.3.4** is a complete standalone module containing:
+- All database migrations (11 files)
 - All React components (4 files)
-- Business logic services
+- Business logic services (NavigationService, ValidationService, RouteRegistrationService)
 - TypeScript type definitions
 - Supabase client configuration
+- View types and layout profiles framework
+- Declarative route registration system
 
 The module can be installed as a complete package without external dependencies on the host project structure.
 
@@ -24,6 +26,34 @@ The module can be installed as a complete package without external dependencies 
 - **Flexible Metadata** - JSONB storage for custom properties
 - **Active State Management** - Easy enable/disable of navigation items
 - **Icon Support** - Built-in icon identifier storage
+
+### v1.3.4 New Features
+
+#### View Types
+- **Backend UI Rendering Classification** - Each navigation item has a `view_type` field
+- **Allowed Values**: `list`, `detail`, `form`, `dashboard`, `wizard`
+- **Default**: `list`
+- **Validation**: Enforced on create/update operations
+- **RBAC**: Admin-only write access
+
+#### Layout Profiles
+- **Backend AppShell Layout Framework** - Global layout profile configurations
+- **Storage**: `navigation_settings.layout_profiles` (JSONB)
+- **Profile Structure**:
+  - `label`: Human-readable name
+  - `zones`: Header, sidebar, toolbar, footer visibility and configuration
+  - `options`: Content padding, max width, scroll behavior
+- **Default Profile**: `backend_default` automatically created
+- **Per-Item Assignment**: Each navigation item references a layout profile
+- **Comprehensive Validation**: Structure and enum values validated
+
+#### Route Registration
+- **Declarative Route Management** - Modules can register their backend routes
+- **Idempotent**: Upsert behavior via unique (module_id, route) index
+- **Route Metadata**: Links to menu items, view types, and layout profiles
+- **Route Constraints**: Must start with `/admin/` prefix
+- **API Endpoint**: `POST /api/navigation/routes/register`
+- **Security**: Admin-only write, authenticated read
 
 ### Performance
 

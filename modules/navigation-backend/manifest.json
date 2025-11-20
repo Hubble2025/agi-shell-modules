@@ -1,9 +1,9 @@
 {
   "$schema": "https://agi-shell-cms.com/schemas/module-manifest-v1.json",
   "module_id": "navigation-backend",
-  "version": "1.4.0",
+  "version": "1.3.4",
   "name": "Navigation Backend Module",
-  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging. v1.4.0 is a complete standalone module with all components, services, and migrations included.",
+  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, view types, layout profiles, and route registration. v1.3.4 adds comprehensive backend layout framework and declarative route management.",
   "author": "Sebastian Hühn",
   "license": "OPSL-1.0",
   "compat": {
@@ -22,7 +22,9 @@
     "api": [
       "/api/navigation/items",
       "/api/navigation/tree",
-      "/api/navigation/logs"
+      "/api/navigation/logs",
+      "/api/navigation/full",
+      "/api/navigation/routes/register"
     ],
     "components": [
       "NavigationLiveView",
@@ -31,11 +33,20 @@
       "NavigationIcon"
     ],
     "services": [
-      "NavigationService"
+      "NavigationService",
+      "ValidationService",
+      "RouteRegistrationService"
     ],
     "types": [
       "NavigationItem",
-      "NavigationLog"
+      "NavigationLog",
+      "ViewType",
+      "LayoutProfile",
+      "LayoutProfiles",
+      "NavigationRoute",
+      "RegisterRoutesInput",
+      "RegisterRoutesResponse",
+      "NavigationFullResponse"
     ],
     "database": {
       "tables": [
@@ -45,7 +56,8 @@
         "navigation_groups",
         "navigation_ui_settings",
         "navigation_assets",
-        "navigation_icons"
+        "navigation_icons",
+        "navigation_routes"
       ],
       "migrations": [
         "20250119000001_navigation_backend_schema.sql",
@@ -55,7 +67,10 @@
         "20251119050637_20250119000005_tenant_id_and_feature_flags.sql",
         "20251119050718_20250119000006_ui_settings_and_assets.sql",
         "20251119050739_20250119000007_icon_system.sql",
-        "20251119050905_20250119000008_default_groups_and_structure.sql"
+        "20251119050905_20250119000008_default_groups_and_structure.sql",
+        "20251120000001_navigation_v134_view_layout_columns.sql",
+        "20251120000002_navigation_v134_layout_profiles.sql",
+        "20251120000003_navigation_v134_routes_table.sql"
       ]
     },
     "events": [
@@ -95,6 +110,24 @@
       "optional": true,
       "version": "1.3.2",
       "performance_gain": "40-60% over v1.3.1"
+    },
+    "view_types": {
+      "description": "Backend UI rendering classification per navigation item (v1.3.4)",
+      "enabled": true,
+      "version": "1.3.4",
+      "allowed_values": ["list", "detail", "form", "dashboard", "wizard"]
+    },
+    "layout_profiles": {
+      "description": "Backend AppShell layout configuration framework (v1.3.4)",
+      "enabled": true,
+      "version": "1.3.4",
+      "configurable": true
+    },
+    "route_registration": {
+      "description": "Declarative backend route registration for modules (v1.3.4)",
+      "enabled": true,
+      "version": "1.3.4",
+      "idempotent": true
     }
   },
   "configuration": {

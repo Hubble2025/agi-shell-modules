@@ -1,3 +1,5 @@
+export type ViewType = 'list' | 'detail' | 'form' | 'dashboard' | 'wizard';
+
 export interface NavigationItem {
   id: string;
   parent_id: string | null;
@@ -10,6 +12,8 @@ export interface NavigationItem {
   metadata: Record<string, unknown>;
   tenant_id?: string | null;
   required_feature_flags?: string[];
+  view_type: ViewType;
+  layout_profile: string;
   created_at: string;
   updated_at: string;
 }
@@ -53,6 +57,7 @@ export interface NavigationSettings {
   applied_template_id: string | null;
   template_applied_at: string | null;
   backup_snapshot: Record<string, unknown> | null;
+  layout_profiles: LayoutProfiles | null;
   created_at: string;
   updated_at: string;
   updated_by: string | null;
@@ -92,6 +97,8 @@ export interface CreateNavigationItemInput {
   metadata?: Record<string, unknown>;
   tenant_id?: string | null;
   required_feature_flags?: string[];
+  view_type?: ViewType;
+  layout_profile?: string;
 }
 
 export interface UpdateNavigationItemInput {
@@ -104,6 +111,8 @@ export interface UpdateNavigationItemInput {
   roles?: string[];
   metadata?: Record<string, unknown>;
   required_feature_flags?: string[];
+  view_type?: ViewType;
+  layout_profile?: string;
 }
 
 export interface NavigationTreeNode extends NavigationItem {
@@ -113,4 +122,87 @@ export interface NavigationTreeNode extends NavigationItem {
 export interface SearchNavigationOptions {
   includeInactive?: boolean;
   tenantId?: string;
+}
+
+export type ContentPadding = 'none' | 'sm' | 'md' | 'lg';
+export type MaxContentWidth = 'full' | 'xl' | '2xl';
+export type ScrollBehavior = 'main_only' | 'page';
+
+export interface LayoutZoneHeader {
+  visible: boolean;
+}
+
+export interface LayoutZoneSidebar {
+  visible: boolean;
+  width?: number;
+}
+
+export interface LayoutZoneToolbar {
+  visible: boolean;
+}
+
+export interface LayoutZoneFooter {
+  visible: boolean;
+}
+
+export interface LayoutZones {
+  header: LayoutZoneHeader;
+  sidebar: LayoutZoneSidebar;
+  toolbar: LayoutZoneToolbar;
+  footer: LayoutZoneFooter;
+}
+
+export interface LayoutOptions {
+  content_padding: ContentPadding;
+  max_content_width: MaxContentWidth;
+  scroll_behavior: ScrollBehavior;
+}
+
+export interface LayoutProfile {
+  label: string;
+  zones: LayoutZones;
+  options: LayoutOptions;
+}
+
+export interface LayoutProfiles {
+  [profileId: string]: LayoutProfile;
+}
+
+export interface NavigationRoute {
+  id: string;
+  module_id: string;
+  route: string;
+  menu_id: string | null;
+  view_type: ViewType;
+  layout_profile: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RegisterRouteInput {
+  route: string;
+  menu_id?: string | null;
+  view_type?: ViewType;
+  layout_profile?: string;
+}
+
+export interface RegisterRoutesInput {
+  module: string;
+  routes: RegisterRouteInput[];
+}
+
+export interface RegisteredRouteResult extends RegisterRouteInput {
+  created: boolean;
+  updated: boolean;
+}
+
+export interface RegisterRoutesResponse {
+  module: string;
+  routes: RegisteredRouteResult[];
+}
+
+export interface NavigationFullResponse {
+  navigation_items: NavigationItem[];
+  layout_profiles: LayoutProfiles;
+  routes: NavigationRoute[];
 }

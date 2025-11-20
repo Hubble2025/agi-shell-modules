@@ -1,7 +1,7 @@
 {
   "name": "@agi-shell/navigation-backend",
-  "version": "1.4.0",
-  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, and comprehensive audit logging",
+  "version": "1.3.4",
+  "description": "Enterprise-grade navigation management system with hierarchical structure, role-based access control, view types, layout profiles, and route registration",
   "author": "Sebastian Hühn",
   "license": "OPSL-1.0",
   "type": "module",

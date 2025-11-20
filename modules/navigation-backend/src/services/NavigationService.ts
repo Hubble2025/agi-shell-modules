@@ -5,7 +5,12 @@ import type {
   UpdateNavigationItemInput,
   NavigationTreeNode,
   SearchNavigationOptions,
+  NavigationSettings,
+  LayoutProfiles,
+  NavigationFullResponse,
+  NavigationRoute,
 } from '@/types/navigation';
+import { validationService, type ValidationError } from './ValidationService';
 
 export class NavigationService {
   private static instance: NavigationService;
@@ -62,6 +67,23 @@ export class NavigationService {
   }
 
   async createItem(item: CreateNavigationItemInput): Promise<NavigationItem> {
+    const viewType = item.view_type ?? 'list';
+    const layoutProfile = item.layout_profile ?? 'backend_default';
+
+    const viewTypeError = validationService.validateViewType(viewType);
+    if (viewTypeError) {
+      throw new Error(viewTypeError.message);
+    }
+
+    const settings = await this.getNavigationSettings();
+    const layoutProfileError = validationService.validateLayoutProfile(
+      layoutProfile,
+      settings?.layout_profiles ?? null
+    );
+    if (layoutProfileError) {
+      throw new Error(layoutProfileError.message);
+    }
+
     const { data, error } = await supabase
       .from('navigation_items')
       .insert([
@@ -71,6 +93,8 @@ export class NavigationService {
           is_active: item.is_active ?? true,
           roles: item.roles ?? ['authenticated'],
           metadata: item.metadata ?? {},
+          view_type: viewType,
+          layout_profile: layoutProfile,
         },
       ])
       .select()
@@ -81,6 +105,24 @@ export class NavigationService {
   }
 
   async updateItem(id: string, updates: UpdateNavigationItemInput): Promise<NavigationItem> {
+    if (updates.view_type) {
+      const viewTypeError = validationService.validateViewType(updates.view_type);
+      if (viewTypeError) {
+        throw new Error(viewTypeError.message);
+      }
+    }
+
+    if (updates.layout_profile) {
+      const settings = await this.getNavigationSettings();
+      const layoutProfileError = validationService.validateLayoutProfile(
+        updates.layout_profile,
+        settings?.layout_profiles ?? null
+      );
+      if (layoutProfileError) {
+        throw new Error(layoutProfileError.message);
+      }
+    }
+
     const { data, error } = await supabase
       .from('navigation_items')
       .update(updates)
@@ -209,6 +251,67 @@ export class NavigationService {
   async getNavigationTree(tenantId?: string): Promise<NavigationTreeNode[]> {
     const items = await this.getItems(tenantId);
     return this.buildTree(items);
+  }
+
+  async getNavigationSettings(): Promise<NavigationSettings | null> {
+    const { data, error } = await supabase
+      .from('navigation_settings')
+      .select('*')
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async getLayoutProfiles(): Promise<LayoutProfiles> {
+    const settings = await this.getNavigationSettings();
+    if (!settings || !settings.layout_profiles) {
+      return {
+        backend_default: {
+          label: 'Backend Default Layout',
+          zones: {
+            header: { visible: true },
+            sidebar: { visible: true, width: 260 },
+            toolbar: { visible: true },
+            footer: { visible: false },
+          },
+          options: {
+            content_padding: 'lg',
+            max_content_width: 'full',
+            scroll_behavior: 'main_only',
+          },
+        },
+      };
+    }
+    return settings.layout_profiles;
+  }
+
+  async getNavigationFull(tenantId?: string): Promise<NavigationFullResponse> {
+    const [items, layoutProfiles, routesResult] = await Promise.all([
+      this.getItems(tenantId),
+      this.getLayoutProfiles(),
+      supabase.from('navigation_routes').select('*').order('module_id'),
+    ]);
+
+    if (routesResult.error) throw routesResult.error;
+
+    return {
+      navigation_items: items,
+      layout_profiles: layoutProfiles,
+      routes: routesResult.data || [],
+    };
+  }
+
+  async getNavigationRoutes(moduleId?: string): Promise<NavigationRoute[]> {
+    let query = supabase.from('navigation_routes').select('*').order('route');
+
+    if (moduleId) {
+      query = query.eq('module_id', moduleId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
   }
 }
 

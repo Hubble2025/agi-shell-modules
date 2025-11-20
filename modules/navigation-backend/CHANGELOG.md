@@ -7,6 +7,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.4] - 2025-11-20
+
+### Added
+- **View Types per Navigation Item** - Backend UI rendering classification
+  - New `view_type` column on `navigation_items` (text, NOT NULL, default 'list')
+  - Allowed values: `list`, `detail`, `form`, `dashboard`, `wizard`
+  - Determines how the backend UI should render the corresponding route
+  - Validated on create/update operations
+  - Admin-only write access via RBAC
+
+- **Layout Profiles System** - Backend AppShell layout configuration
+  - New `layout_profiles` column on `navigation_settings` (JSONB)
+  - Stores global layout profile configurations keyed by profile ID
+  - New `layout_profile` column on `navigation_items` (text, NOT NULL, default 'backend_default')
+  - Each profile defines AppShell zones (header, sidebar, toolbar, footer) and options
+  - Comprehensive validation for profile structure and enum values
+  - Default `backend_default` profile automatically created on migration
+  - Changes tracked in `navigation_settings_history`
+
+- **Route Registration Subsystem** - Declarative backend route management
+  - New `navigation_routes` table for module route registration
+  - Idempotent upsert behavior via unique index on (module_id, route)
+  - Links routes to menu items, view types, and layout profiles
+  - Route must start with `/admin/` prefix (enforced via constraint)
+  - RLS policies: authenticated read, admin-only write
+  - Automatic `updated_at` timestamp management
+
+- **New API Endpoints**
+  - `GET /api/navigation/full` - Aggregating endpoint returning navigation items, layout profiles, and routes
+  - `POST /api/navigation/routes/register` - Idempotent route registration for modules
+
+- **Extended Existing APIs**
+  - `GET /api/navigation/items` now includes `view_type` and `layout_profile` fields
+  - `GET /api/navigation/tree` now includes `view_type` and `layout_profile` fields
+  - Backward compatible - existing clients ignoring new fields continue to work
+
+- **New Services**
+  - `ValidationService` - Centralized validation for view types, layout profiles, routes, and UUIDs
+  - `RouteRegistrationService` - Handles route registration, updates, and unregistration
+
+### Changed
+- Module version incremented from 1.3.3 to 1.3.4
+- `NavigationItem` interface extended with `view_type` and `layout_profile` properties
+- `NavigationSettings` interface extended with `layout_profiles` property
+- `CreateNavigationItemInput` and `UpdateNavigationItemInput` extended with optional view type and layout profile
+- `NavigationService` now validates view types and layout profiles on create/update
+
+### Database Schema
+- Three new migrations:
+  - `20251120000001_navigation_v134_view_layout_columns.sql` - Adds view_type and layout_profile columns
+  - `20251120000002_navigation_v134_layout_profiles.sql` - Adds layout_profiles JSONB configuration
+  - `20251120000003_navigation_v134_routes_table.sql` - Creates navigation_routes table with RLS
+
+### Types
+- New TypeScript types:
+  - `ViewType` - Enum for view types
+  - `ContentPadding`, `MaxContentWidth`, `ScrollBehavior` - Layout option enums
+  - `LayoutProfile`, `LayoutProfiles` - Layout profile structure
+  - `NavigationRoute` - Route registration record
+  - `RegisterRouteInput`, `RegisterRoutesInput`, `RegisterRoutesResponse` - Route registration API types
+  - `NavigationFullResponse` - Aggregated response type
+
+### Security
+- View type and layout profile changes restricted to admin roles
+- Route registration restricted to admin roles
+- All new operations respect existing RLS policies
+- Comprehensive validation prevents invalid data entry
+
+### Backward Compatibility
+- **Fully backward compatible with v1.3.3**
+- All changes are additive (new columns, new tables, extended responses)
+- Existing queries and API calls continue to work unchanged
+- New columns have sensible defaults (`view_type: 'list'`, `layout_profile: 'backend_default'`)
+- No breaking changes to existing tables, RLS policies, or endpoints
+
+### Migration
+- Non-breaking changes - safe to apply to production
+- Idempotent migrations (safe to run multiple times)
+- Existing navigation items automatically get default values
+- Default layout profile automatically created if none exists
+
+---
+
 ## [1.3.3] - 2025-11-19
 
 ### Added
