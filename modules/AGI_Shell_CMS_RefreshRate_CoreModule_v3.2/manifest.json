@@ -42,8 +42,8 @@
         "user_roles"
       ],
       "migrations": [
-        "20251124000001_refresh_core_schema.sql",
-        "20251124000002_fix_user_roles_rls.sql"
+        "20251124000001_refreshrate_core_schema.sql",
+        "20251124000002_refreshrate_fix_user_roles_rls.sql"
       ]
     }
   },
