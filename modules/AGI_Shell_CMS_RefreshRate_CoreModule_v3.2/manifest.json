@@ -1,0 +1,86 @@
+{
+  "$schema": "https://agi-shell-cms.com/schemas/module-manifest-v2.2.json",
+  "id": "agi_shell_refresh_rate_core",
+  "name": "AGI Shell CMS RefreshRate CoreModule",
+  "version": "3.2.0",
+  "type": "core",
+  "internal": true,
+  "protected": true,
+  "installSource": "core",
+  "upgradeViaUploadAllowed": true,
+  "description": "Core module for system-wide refresh rate management, state tracking, and revision control. Provides centralized refresh policy configuration and real-time system state monitoring.",
+  "author": "Sebastian Hühn",
+  "license": "OPSL-1.0",
+  "compat": {
+    "agi_shell_cms": ">=1.9.0",
+    "boltnew": "*",
+    "semantic_os": "*",
+    "aion": "*"
+  },
+  "dependencies": {
+    "supabase": ">=2.0.0",
+    "postgres": ">=14.0.0",
+    "react": ">=18.0.0"
+  },
+  "provides": {
+    "components": [
+      "SystemStatePanel",
+      "RefreshPolicyForm"
+    ],
+    "services": [
+      "boltDatabaseClient"
+    ],
+    "edge_functions": [
+      "system-state",
+      "refresh-policy"
+    ],
+    "database": {
+      "tables": [
+        "system_revision",
+        "refresh_policy",
+        "module_registry",
+        "user_roles"
+      ],
+      "migrations": [
+        "20251124000001_refresh_core_schema.sql",
+        "20251124000002_fix_user_roles_rls.sql"
+      ]
+    }
+  },
+  "entrypoints": {
+    "ui_main": "src/components/SystemStatePanel.tsx",
+    "ui_settings": "src/components/RefreshPolicyForm.tsx",
+    "edge_functions": {
+      "system_state": "supabase/functions/system-state/index.ts",
+      "refresh_policy": "supabase/functions/refresh-policy/index.ts"
+    }
+  },
+  "features": {
+    "system_revision_tracking": {
+      "description": "Global revision counter for system state tracking",
+      "enabled": true
+    },
+    "refresh_policy_management": {
+      "description": "Centralized refresh interval configuration per module/context",
+      "enabled": true
+    },
+    "module_registry": {
+      "description": "Basic module registration and lifecycle tracking",
+      "enabled": true
+    },
+    "role_based_access": {
+      "description": "Admin/System role-based access control for core features",
+      "enabled": true
+    }
+  },
+  "configuration": {
+    "default_refresh_interval": {
+      "type": "integer",
+      "default": 5000,
+      "min": 1000,
+      "max": 60000,
+      "description": "Default refresh interval in milliseconds"
+    }
+  },
+  "tags": ["core", "refresh", "state", "revision", "policy", "monitoring"]
+}
