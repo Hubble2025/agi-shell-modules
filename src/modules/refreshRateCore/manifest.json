@@ -1,0 +1,18 @@
+{
+  "id": "agi_shell_refresh_rate_core",
+  "name": "AGI Shell CMS RefreshRate CoreModule",
+  "version": "3.2.0",
+  "type": "core",
+  "internal": true,
+  "protected": true,
+  "installSource": "core",
+  "upgradeViaUploadAllowed": true,
+  "entrypoints": {
+    "ui_main": "src/components/SystemStatePanel.tsx",
+    "ui_settings": "src/components/RefreshPolicyForm.tsx",
+    "edge_functions": {
+      "system_state": "supabase/functions/system-state/index.ts",
+      "refresh_policy": "supabase/functions/refresh-policy/index.ts"
+    }
+  }
+}
