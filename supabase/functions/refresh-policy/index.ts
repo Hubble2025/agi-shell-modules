@@ -147,6 +147,25 @@ serve(async (req) => {
       );
     }
 
+    const { data: existingData } = await supabase
+      .from("refresh_policy")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (!existingData) {
+      return new Response(
+        JSON.stringify({ error: "NO_POLICY_FOUND" }),
+        {
+          status: 404,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
     const { data, error } = await supabase
       .from("refresh_policy")
       .update({
@@ -156,6 +175,7 @@ serve(async (req) => {
         dashboard_interval: body.dashboard_interval,
         updated_at: new Date().toISOString()
       })
+      .eq("id", existingData.id)
       .select("*")
       .limit(1);
 
