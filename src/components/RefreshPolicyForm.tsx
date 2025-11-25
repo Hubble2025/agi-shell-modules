@@ -67,11 +67,13 @@ export const RefreshPolicyForm: React.FC = () => {
       <label>Default Interval (ms)</label>
       <input
         type="number"
+        min="1000"
+        max="60000"
         value={policy.default_interval}
         onChange={(e) =>
           setPolicy({
             ...policy,
-            default_interval: Number(e.target.value)
+            default_interval: Number(e.target.value) || 1000
           })
         }
       />
@@ -79,11 +81,13 @@ export const RefreshPolicyForm: React.FC = () => {
       <label>Module Interval (ms)</label>
       <input
         type="number"
+        min="1000"
+        max="60000"
         value={policy.module_interval}
         onChange={(e) =>
           setPolicy({
             ...policy,
-            module_interval: Number(e.target.value)
+            module_interval: Number(e.target.value) || 1000
           })
         }
       />
@@ -91,11 +95,13 @@ export const RefreshPolicyForm: React.FC = () => {
       <label>Settings Interval (ms)</label>
       <input
         type="number"
+        min="1000"
+        max="60000"
         value={policy.settings_interval}
         onChange={(e) =>
           setPolicy({
             ...policy,
-            settings_interval: Number(e.target.value)
+            settings_interval: Number(e.target.value) || 1000
           })
         }
       />
@@ -103,11 +109,13 @@ export const RefreshPolicyForm: React.FC = () => {
       <label>Dashboard Interval (ms)</label>
       <input
         type="number"
+        min="1000"
+        max="60000"
         value={policy.dashboard_interval}
         onChange={(e) =>
           setPolicy({
             ...policy,
-            dashboard_interval: Number(e.target.value)
+            dashboard_interval: Number(e.target.value) || 1000
           })
         }
       />

@@ -1,76 +1,53 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
+  "Access-Control-Allow-Methods": "GET, OPTIONS"
 };
 
+async function requireAuth(req: Request, supabase: SupabaseClient) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return false;
+  const jwt = authHeader.substring(7);
+  const { data: { user }, error } = await supabase.auth.getUser(jwt);
+  return !!user && !error;
+}
+
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders
+  if (req.method === "OPTIONS")
+    return new Response(null, { status: 200, headers: corsHeaders });
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  );
+
+  const isAuthenticated = await requireAuth(req, supabase);
+  if (!isAuthenticated)
+    return new Response(JSON.stringify({ error: "UNAUTHORIZED" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
-  }
 
   try {
-    const url = Deno.env.get("SUPABASE_URL") ?? "";
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const { data, error } = await supabase.from("system_revision").select("*");
+    if (error) throw error;
 
-    const supabase = createClient(url, serviceKey);
-
-    const { data, error } = await supabase
-      .from("system_revision")
-      .select("key, revision, updated_at");
-
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json"
-          }
-        }
-      );
-    }
-
-    const map: Record<string, { revision: number; updated_at: string }> = {};
-    (data ?? []).forEach((row: any) => {
-      map[row.key] = {
-        revision: row.revision,
-        updated_at: row.updated_at
-      };
+    const result: Record<string, any> = { timestamp: new Date().toISOString() };
+    data.forEach(row => {
+      result[row.key] = { revision: row.revision, updated_at: row.updated_at };
     });
 
-    const body = {
-      ...map,
-      timestamp: new Date().toISOString()
-    };
-
-    return new Response(
-      JSON.stringify(body),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
   }
 });
