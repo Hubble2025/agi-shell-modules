@@ -1,8 +1,8 @@
 {
   "$schema": "https://agi-shell-cms.com/schemas/module-manifest-v2.2.json",
   "id": "agi_shell_refresh_rate_core",
-  "name": "AGI Shell CMS RefreshRate CoreModule",
-  "version": "3.2.0",
+  "name": "AGI Shell CMS RefreshRate CoreModule v3.2.1 (Patched)",
+  "version": "3.2.1",
   "type": "core",
   "internal": true,
   "protected": true,
